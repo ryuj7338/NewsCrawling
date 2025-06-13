@@ -24,7 +24,7 @@ headers = {
     "Accept-Encoding": "gzip, deflate, br"
 }
 
-# 의료·바이오 > 원무행정 완료 868
+#
 dutyCtgr = "10039"
 duty = "1000317"
 
@@ -113,31 +113,22 @@ if response.status_code == 200:
                                     cert_list = [cert.strip() for cert in cert_text.split(',') if cert.strip()]
                                 break  # 자격증도 첫 항목만 추출
 
-                        # 자격증이 여러 개 있을 경우 하나씩 저장
+                        # 자격증 있는 경우
                         if cert_list:
                             for cert in cert_list:
-                                print(gno + "번 공고 우대 자격증 : " + cert)
-                                certificates.append({
-                                    "직무 카테고리": dutyCtgr,
-                                    "직무 코드": duty,
-                                    "공고번호": gno,
-                                    "자격증": cert,
-                                    "수집일": time.strftime('%Y.%m.%d - %H:%M:%S'),
-                                    "href": href,
-                                    "마감일": deadline_text
-                                })
-                        # 자격증 정보가 없는 경우도 공고 정보 저장
+                                print(f"공고번호: {gno}")
+                                print(f"우대 자격증: {cert}")
+                                print(f"마감일: {deadline_text}")
+                                print(f"링크: https://www.jobkorea.co.kr{href}")
+                                print("-" * 40)
+
+                        # 자격증 없는 경우
                         else:
-                            print(gno + "번 공고 (자격증 없음)")
-                            certificates.append({
-                                "직무 카테고리": dutyCtgr,
-                                "직무 코드": duty,
-                                "공고번호": gno,
-                                "자격증": "",  # 공란
-                                "수집일": time.strftime('%Y.%m.%d - %H:%M:%S'),
-                                "href": href,
-                                "마감일": deadline_text
-                            })
+                            print(f"공고번호: {gno}")
+                            print("우대 자격증: 없음")
+                            print(f"마감일: {deadline_text}")
+                            print(f"링크: https://www.jobkorea.co.kr{href}")
+                            print("-" * 40)
 
                     else:
                         print("[오류]" + gno + "번 상세 페이지 응답 실패:", detail_res.status_code)
@@ -152,19 +143,7 @@ if response.status_code == 200:
 else:
     print("[오류] 리스트 페이지 요청 실패:", response.status_code)
 
-# pandas 사용 -> 엑셀 파일로 저장
-df = pd.DataFrame(certificates)
-file_path = "jobkorea_requirements.xlsx"
 
-if os.path.exists(file_path):
-    # 기존 파일 읽기
-    existing_df = pd.read_excel(file_path)
-    # 기존 + 신규 데이터 결합
-    combined_df = pd.concat([existing_df, df], ignore_index=True)
-else:
-    combined_df = df
 
-# 저장 (덮어쓰기)
-combined_df.to_excel(file_path, index=False)
 
 print("✔ 종료")
